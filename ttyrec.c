@@ -371,6 +371,9 @@ fixtty()
 
 	rtt = tt;
 #if defined(SVR4)
+#if !defined(XCASE)
+#define XCASE 0
+#endif
 	rtt.c_iflag = 0;
 	rtt.c_lflag &= ~(ISIG|ICANON|XCASE|ECHO|ECHOE|ECHOK|ECHONL);
 	rtt.c_oflag = OPOST;
