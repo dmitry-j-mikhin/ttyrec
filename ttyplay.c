@@ -88,7 +88,7 @@ ttywait (struct timeval prev, struct timeval cur, double speed)
 
     gettimeofday(&start, NULL);
 
-    if (speed == 0)
+    if (speed == 0.0)
       diffp = NULL;
     else
       diff = timeval_diff(drift, timeval_div(diff, speed));
@@ -97,6 +97,7 @@ ttywait (struct timeval prev, struct timeval cur, double speed)
 	diff.tv_sec = diff.tv_usec = 0;
     }
 
+    FD_ZERO(&readfs);
     FD_SET(STDIN_FILENO, &readfs);
     /* 
      * We use select() for sleeping with subsecond precision.
@@ -105,9 +106,10 @@ ttywait (struct timeval prev, struct timeval cur, double speed)
      * Save "diff" since select(2) may overwrite it to {0, 0}. 
      */
     struct timeval orig_diff = diff;
-    select(1, &readfs, NULL, NULL, diffp); /* skip if a user hits any key */
+    int r;
+    r = select(1, &readfs, NULL, NULL, diffp); /* skip if a user hits any key */
     diff = orig_diff;  /* Restore the original diff value. */
-    if (FD_ISSET(0, &readfs)) { /* a user hits a character? */
+    if (r > 0 && FD_ISSET(0, &readfs)) { /* a user hits a character? */
         char c;
         read(STDIN_FILENO, &c, 1); /* drain the character */
         switch (c) {
