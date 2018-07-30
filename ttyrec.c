@@ -262,8 +262,8 @@ check_line (const char *line)
     }
 }
 
-void
-check_output(const char *str, int len)
+static void
+uu_check_output(const char *str, int len)
 {
     static struct linebuf lbuf = {"", 0};
     int i;
@@ -288,6 +288,23 @@ check_output(const char *str, int len)
     }
 }
 
+static int
+check_output(char *str, int len)
+{
+    char *p;
+
+    /* If we see query string, remove it */
+    /* ESC [ > 0 c : Send Device Attributes */
+    if (len >= 5 && (p = strstr(str, "\e[>0c")) != NULL) {
+	if (len == 5)
+	    return 0;
+	memmove(p, p+5, len-5+1-(p-str));
+	return len-5;
+    }
+
+    return len;
+}
+
 void
 dooutput()
 {
@@ -306,12 +323,14 @@ dooutput()
 		if (cc <= 0)
 			break;
 		if (uflg)
-		    check_output(obuf, cc);
+		    uu_check_output(obuf, cc);
 		h.len = cc;
 		gettimeofday(&h.tv, NULL);
 		(void) write(1, obuf, cc);
-		(void) write_header(fscript, &h);
-		(void) fwrite(obuf, 1, cc, fscript);
+		if ((cc = check_output(obuf, cc))) {
+			(void) write_header(fscript, &h);
+			(void) fwrite(obuf, 1, cc, fscript);
+		}
 	}
 	done();
 }
