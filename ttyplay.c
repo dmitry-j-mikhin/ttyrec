@@ -83,12 +83,16 @@ ttywait (struct timeval prev, struct timeval cur, double speed)
     static struct timeval drift = {0, 0};
     struct timeval start;
     struct timeval diff = timeval_diff(prev, cur);
+    struct timeval *diffp = &diff;
     fd_set readfs;
 
     gettimeofday(&start, NULL);
 
-    assert(speed != 0);
-    diff = timeval_diff(drift, timeval_div(diff, speed));
+    if (speed == 0)
+      diffp = NULL;
+    else
+      diff = timeval_diff(drift, timeval_div(diff, speed));
+
     if (diff.tv_sec < 0) {
 	diff.tv_sec = diff.tv_usec = 0;
     }
@@ -101,7 +105,7 @@ ttywait (struct timeval prev, struct timeval cur, double speed)
      * Save "diff" since select(2) may overwrite it to {0, 0}. 
      */
     struct timeval orig_diff = diff;
-    select(1, &readfs, NULL, NULL, &diff);
+    select(1, &readfs, NULL, NULL, diffp); /* skip if a user hits any key */
     diff = orig_diff;  /* Restore the original diff value. */
     if (FD_ISSET(0, &readfs)) { /* a user hits a character? */
         char c;
@@ -117,6 +121,9 @@ ttywait (struct timeval prev, struct timeval cur, double speed)
             break;
         case '1':
             speed = 1.0;
+            break;
+        case '0':
+            speed = 0.0;
             break;
         }
 	drift.tv_sec = drift.tv_usec = 0;
@@ -136,7 +143,7 @@ double
 ttynowait (struct timeval prev, struct timeval cur, double speed)
 {
     /* do nothing */
-    return 0; /* Speed isn't important. */
+    return 1.0; /* Speed isn't important. */
 }
 
 int
@@ -202,7 +209,9 @@ ttyplay (FILE *fp, double speed, ReadFunc read_func,
 	}
 
 	if (!first_time) {
-	    speed = wait_func(prev, h.tv, speed);
+	    do {
+		speed = wait_func(prev, h.tv, speed);
+	    } while (speed == 0.0);
 	}
 	first_time = 0;
 
