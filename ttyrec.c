@@ -113,6 +113,13 @@ char	line[] = "/dev/ptyXX";
 int	aflg;
 int	uflg;
 
+static void
+resize(int dummy) {
+	/* transmit window change information to the child */
+	(void) ioctl(0, TIOCGWINSZ, (char *)&win);
+	(void) ioctl(master, TIOCSWINSZ, (char *)&win);
+}
+
 int
 main(argc, argv)
 	int argc;
@@ -178,6 +185,7 @@ main(argc, argv)
 		else
 			doshell(command);
 	}
+	signal(SIGWINCH, resize);
 	doinput();
 
 	return 0;
