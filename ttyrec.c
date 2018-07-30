@@ -125,6 +125,7 @@ main(argc, argv)
 	int argc;
 	char *argv[];
 {
+	struct sigaction sa;
 	extern int optind;
 	int ch;
 	void finish();
@@ -168,7 +169,10 @@ main(argc, argv)
 	getmaster();
 	fixtty();
 
-	(void) signal(SIGCHLD, finish);
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = finish;
+	sigaction(SIGCHLD, &sa, NULL);
 	child = fork();
 	if (child < 0) {
 		perror("fork");
@@ -180,12 +184,16 @@ main(argc, argv)
 			perror("fork");
 			fail();
 		}
-		if (child)
+		if (child) {
+			sa.sa_flags = SA_RESTART;
+			sigaction(SIGCHLD, &sa, NULL);
 			dooutput();
-		else
+		} else
 			doshell(command);
 	}
-	signal(SIGWINCH, resize);
+	sa.sa_handler = resize;
+	sa.sa_flags = SA_RESTART;
+	sigaction(SIGWINCH, &sa, NULL);
 	doinput();
 
 	return 0;
