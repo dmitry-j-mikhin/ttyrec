@@ -1,6 +1,9 @@
 CC = gcc
-CFLAGS = -O2
+DEFS= -DSVR4 -D_GNU_SOURCE
+CFLAGS = -O2 -g -fomit-frame-pointer -Wall $(DEFS)
 VERSION = 1.0.8
+
+DESTDIR=
 
 TARGET = ttyrec ttyplay ttytime
 
@@ -17,6 +20,9 @@ ttyplay: ttyplay.o io.o
 
 ttytime: ttytime.o io.o
 	$(CC) $(CFLAGS) -o ttytime ttytime.o io.o
+
+install:
+	install ttyrec ttyplay ttytime $(DESTDIR)/usr/bin
 
 clean:
 	rm -f *.o $(TARGET) ttyrecord *~
