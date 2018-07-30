@@ -209,14 +209,10 @@ finish()
 	union wait status;
 #endif /* !SVR4 */
 	register int pid;
-	register int die = 0;
 
 	while ((pid = wait3((int *)&status, WNOHANG, 0)) > 0)
 		if (pid == child)
-			die = 1;
-
-	if (die)
-		done();
+			break;
 }
 
 struct linebuf {
