@@ -13,13 +13,13 @@ DIST =	ttyrec.c ttyplay.c ttyrec.h io.c io.h ttytime.c\
 all: $(TARGET)
 
 ttyrec: ttyrec.o io.o
-	$(CC) $(CFLAGS) -o ttyrec ttyrec.o io.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o ttyrec ttyrec.o io.o
 
 ttyplay: ttyplay.o io.o
-	$(CC) $(CFLAGS) -o ttyplay ttyplay.o io.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o ttyplay ttyplay.o io.o
 
 ttytime: ttytime.o io.o
-	$(CC) $(CFLAGS) -o ttytime ttytime.o io.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o ttytime ttytime.o io.o
 
 install:
 	install ttyrec ttyplay ttytime $(DESTDIR)/usr/bin
