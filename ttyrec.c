@@ -325,9 +325,9 @@ doshell(const char* command)
 	(void) close(slave);
 
 	if (!command) {
-		execl(shell, strrchr(shell, '/') + 1, "-i", 0);
+		execl(shell, strrchr(shell, '/') + 1, "-i", NULL);
 	} else {
-		execl(shell, strrchr(shell, '/') + 1, "-c", command, 0);	
+		execl(shell, strrchr(shell, '/') + 1, "-c", command, NULL);	
 	}
 	perror(shell);
 	fail();
