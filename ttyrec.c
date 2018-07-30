@@ -464,8 +464,9 @@ getslave()
 			fail();
 		}
 #endif
-		(void) ioctl(0, TIOCGWINSZ, (char *)&win);
 	}
+	(void) tcsetattr(slave, TCSAFLUSH, &tt);
+	(void) ioctl(slave, TIOCSWINSZ, (char *)&win);
 #else /* !SVR4 */
 #ifndef HAVE_openpty
 	line[strlen("/dev/")] = 't';
