@@ -252,7 +252,6 @@ usage (void)
 FILE *
 input_from_stdin (void)
 {
-    FILE *fp;
     int fd = edup(STDIN_FILENO);
     edup2(STDOUT_FILENO, STDIN_FILENO);
     return efdopen(fd, "r");
